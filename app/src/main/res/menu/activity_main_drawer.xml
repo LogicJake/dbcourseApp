@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group
+        android:id="@+id/student"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/s1"
+            android:title="选课" />
+        <item
+            android:id="@+id/s2"
+            android:title="查看所选课程" />
+        <item
+            android:id="@+id/s3"
+            android:title="查看个人信息" />
+
+    </group>
+
+    <group
+        android:id="@+id/teacher">
+        <item
+            android:id="@+id/t1"
+            android:title="查看所有学生名单" />
+
+        <item
+            android:id="@+id/t2"
+            android:title="查看课程学生名单" />
+
+    </group>
+
+
+
+</menu>

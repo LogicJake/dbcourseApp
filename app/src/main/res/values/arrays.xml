@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="roles">
+        <item>教务员</item>
+        <item>学生</item>
+    </string-array>
+</resources>
