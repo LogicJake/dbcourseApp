@@ -120,10 +120,83 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                 deleteStu(sno);
                 break;
             case 0:
+                String old_no = (String)mListData.get(i).get("no");
+                String old_name = (String)mListData.get(i).get("name");
+                String old_sex = (String)mListData.get(i).get("sex");
+                String old_age = (String)mListData.get(i).get("age");
+                String old_dept = (String)mListData.get(i).get("dept");
+                View dialog_view = getLayoutInflater().inflate(R.layout.dialog_view_add_stu, null);
 
+                final EditText no = (EditText) dialog_view.findViewById(R.id.dialog_sno);
+                final EditText name = (EditText) dialog_view.findViewById(R.id.dialog_sname);
+                final EditText sex = (EditText) dialog_view.findViewById(R.id.dialog_sex);
+                final EditText age = (EditText) dialog_view.findViewById(R.id.dialog_age);
+                final EditText dept = (EditText) dialog_view.findViewById(R.id.dialog_dept);
+
+                no.setText(old_no);
+                name.setText(old_name);
+                sex.setText(old_sex);
+                age.setText(old_age);
+                dept.setText(old_dept);
+
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle("更新课程信息")
+                        .setView(dialog_view)
+                        .setCancelable(false)
+                        .setNegativeButton("取消",null)
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String content_no = no .getText().toString();
+                                String content_name = name .getText().toString();
+                                String content_sex = sex .getText().toString();
+                                String content_age = age .getText().toString();
+                                String content_dept = dept .getText().toString();
+                                updateStu(content_no,content_name,content_sex,content_age,content_dept);
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
                 break;
         }
         return super.onContextItemSelected(item);
+    }
+
+    public void updateStu(String no,String name,String sex,String age,String dept){
+        OkHttpUtils
+                .get()
+                .url(api_url)
+                .addParams("_action", "updateStu")
+                .addParams("sno", no)
+                .addParams("sname", name)
+                .addParams("ssex", sex)
+                .addParams("sage", age)
+                .addParams("sdept", dept)
+                .build()
+                .execute(new StringCallback()
+                {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        Toast.makeText(context,"网络错误",Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onResponse(String response, int id) {
+                        Log.d(TAG, "onResponse: "+response);
+                        try {
+                            JSONObject res = new JSONObject(response).getJSONObject("data");
+                            int status = res.getInt("status");
+                            if(status == 1)
+                                Toast.makeText(context,"更新成功",Toast.LENGTH_LONG).show();
+                            else
+                                Toast.makeText(context,"更新失败",Toast.LENGTH_LONG).show();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(context,"服务器错误",Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 
 
