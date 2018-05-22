@@ -226,8 +226,35 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                 deleteCourse(cno);
                 break;
             case 0:
-
+            {
+                String old_no = (String)mListData.get(i).get("no");
+                String old_name = (String)mListData.get(i).get("name");
+                String old_credit = (String)mListData.get(i).get("credit");
+                View dialog_view = getLayoutInflater().inflate(R.layout.dialog_view_add_course, null);
+                final EditText no = (EditText) dialog_view.findViewById(R.id.dialog_cno);
+                no.setText(old_no);
+                final EditText cname = (EditText) dialog_view.findViewById(R.id.dialog_cname);
+                cname.setText(old_name);
+                final EditText credit = (EditText) dialog_view.findViewById(R.id.dialog_ccredit);
+                credit.setText(old_credit);
+                AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setTitle("更新课程信息")
+                        .setView(dialog_view)
+                        .setCancelable(false)
+                        .setNegativeButton("取消",null)
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String content_cno = no .getText().toString();
+                                String content_cname = cname .getText().toString();
+                                String content_credit = credit .getText().toString();
+                                updateCourse(content_cno,content_cname,content_credit);
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
                 break;
+            }
             case 2:
                 Intent intent = new  Intent(AllCourseActivity.this,AllScActivity.class);
                 intent.putExtra("cno",cno);
@@ -235,6 +262,41 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                 break;
         }
         return super.onContextItemSelected(item);
+    }
+
+    public void updateCourse(String cno,String cname,String credit){
+        OkHttpUtils
+                .get()
+                .url(api_url)
+                .addParams("_action", "updateCourse")
+                .addParams("cno", cno)
+                .addParams("cname", cname)
+                .addParams("ccredit", credit)
+                .build()
+                .execute(new StringCallback()
+                {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        Toast.makeText(context,"网络错误",Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onResponse(String response, int id) {
+                        Log.d(TAG, "onResponse: "+response);
+                        try {
+                            JSONObject res = new JSONObject(response).getJSONObject("data");
+                            int status = res.getInt("status");
+                            if(status == 1)
+                                Toast.makeText(context,"更新成功",Toast.LENGTH_LONG).show();
+                            else
+                                Toast.makeText(context,"更新失败",Toast.LENGTH_LONG).show();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(context,"服务器错误",Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 
     public void deleteCourse(final String cno){
