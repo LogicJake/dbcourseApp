@@ -10,7 +10,11 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -35,7 +39,7 @@ import okhttp3.Call;
 import static com.scy.courseselection.AllStuActivity.setListViewHeightBasedOnChildren;
 import static com.scy.courseselection.MainActivity.api_url;
 
-public class AllCourseActivity extends AppCompatActivity implements SpringView.OnFreshListener,AdapterView.OnItemClickListener,View.OnClickListener {
+public class AllCourseActivity extends AppCompatActivity implements SpringView.OnFreshListener,View.OnClickListener {
     private Context context = this;
     private SpringView sv;
     private int page = 1;
@@ -75,8 +79,14 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
 
         mlistview = (ListView)findViewById(R.id.booklist) ;
         mlistview.setDividerHeight(5 );
-        mlistview.setOnItemClickListener(this);
-
+        mlistview.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                contextMenu.add(0, 0, 0, "修改");
+                contextMenu.add(0, 1, 0, "删除");
+                contextMenu.add(0, 2, 0, "查看学生名单");
+            }
+        });
         floatingActionButton = (FloatingActionButton)findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(this);
 
@@ -143,14 +153,6 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        String cno = (String) mListData.get(i).get("no");
-        Intent intent = new  Intent(AllCourseActivity.this,AllScActivity.class);
-        intent.putExtra("cno",cno);
-        startActivity(intent);
-    }
-
-    @Override
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.fab:{
@@ -213,4 +215,70 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                     }
                 });
     }
+
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
+                .getMenuInfo();
+        int i = (int) info.id;
+        String cno = (String) mListData.get(i).get("no");
+        switch (item.getItemId()) {
+            case 1:
+                deleteCourse(cno);
+                break;
+            case 0:
+
+                break;
+            case 2:
+                Intent intent = new  Intent(AllCourseActivity.this,AllScActivity.class);
+                intent.putExtra("cno",cno);
+                startActivity(intent);
+                break;
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    public void deleteCourse(final String cno){
+        new AlertDialog.Builder(this)
+                .setTitle("确定")
+                .setMessage("是否确认删除该课程")
+                .setCancelable(false)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        OkHttpUtils
+                                .get()
+                                .url(api_url)
+                                .addParams("_action", "deleteCourse")
+                                .addParams("cno", cno)
+                                .build()
+                                .execute(new StringCallback()
+                                {
+                                    @Override
+                                    public void onError(Call call, Exception e, int id) {
+                                        Toast.makeText(context,"网络错误",Toast.LENGTH_LONG).show();
+                                    }
+
+                                    @Override
+                                    public void onResponse(String response, int id) {
+                                        Log.d(TAG, "onResponse: "+response);
+                                        try {
+                                            JSONObject res = new JSONObject(response).getJSONObject("data");
+                                            int status = res.getInt("status");
+                                            if(status == 1)
+                                                Toast.makeText(context,"删除成功",Toast.LENGTH_LONG).show();
+                                            else
+                                                Toast.makeText(context,"删除失败",Toast.LENGTH_LONG).show();
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                            Toast.makeText(context,"服务器错误",Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                });
+                    }
+                })
+                .create().show();
+    }
+
 }

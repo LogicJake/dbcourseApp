@@ -2,6 +2,7 @@ package com.scy.courseselection;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
@@ -9,6 +10,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -35,7 +38,7 @@ import okhttp3.Call;
 
 import static com.scy.courseselection.MainActivity.api_url;
 
-public class AllStuActivity extends AppCompatActivity implements SpringView.OnFreshListener,View.OnClickListener,AdapterView.OnItemLongClickListener {
+public class AllStuActivity extends AppCompatActivity implements SpringView.OnFreshListener,View.OnClickListener {
     private Context context = this;
     private SpringView sv;
     private int page = 1;
@@ -75,8 +78,13 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
 
         mlistview = (ListView)findViewById(R.id.booklist) ;
         mlistview.setDividerHeight(5 );
-        mlistview.setOnItemLongClickListener(this);
-
+        mlistview.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                contextMenu.add(0, 0, 0, "修改");
+                contextMenu.add(0, 1, 0, "删除");
+            }
+        });
         floatingActionButton = (FloatingActionButton)findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(this);
 
@@ -100,6 +108,22 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
             Toast.makeText(AllStuActivity.this, "没有更多学生信息", Toast.LENGTH_SHORT).show();
             sv.onFinishFreshAndLoad();
         }
+    }
+
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
+                .getMenuInfo();
+        int i = (int) info.id;
+        String sno = (String) mListData.get(i).get("no");
+        switch (item.getItemId()) {
+            case 1:
+                deleteStu(sno);
+                break;
+            case 0:
+
+                break;
+        }
+        return super.onContextItemSelected(item);
     }
 
 
@@ -232,9 +256,7 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                 });
     }
 
-    @Override
-    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-        final String sno = (String) mListData.get(i).get("no");
+    public void deleteStu(final String sno){
         new AlertDialog.Builder(this)
                 .setTitle("确定")
                 .setMessage("是否确认删除该学生")
@@ -275,6 +297,6 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                                 });                    }
                 })
                 .create().show();
-        return true;
     }
+
 }
