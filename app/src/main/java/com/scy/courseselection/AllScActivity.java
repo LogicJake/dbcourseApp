@@ -173,7 +173,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
     }
 
     public void getDataBySno(String sno){
-        setTitle("课程名单");
+        setTitle("修读课程");
         OkHttpUtils
                 .get()
                 .url(api_url)
@@ -202,6 +202,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                                 map.put("sname", temp.getString("sname"));
                                 map.put("cname", temp.getString("cname"));
                                 map.put("credit", temp.getString("credit"));
+                                map.put("cno", temp.getString("cno"));
                                 map.put("grade", temp.getString("grade"));
                                 mListData.add(map);
                             }
@@ -218,9 +219,41 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
 
 
     public void click(View v) {
-        Toast.makeText(
-                context,
-                "listview的内部的按钮被点击了！，位置是-->" + (Integer) v.getTag(),
-                Toast.LENGTH_SHORT).show();
+        String sno = (String)mListData.get((Integer) v.getTag()).get("sno");
+        String cno = (String)mListData.get((Integer) v.getTag()).get("cno");
+        deleteSc(sno,cno);
+    }
+
+    public void deleteSc(String sno,String cno){
+        OkHttpUtils
+                .get()
+                .url(api_url)
+                .addParams("_action", "deleteSc")
+                .addParams("cno", cno)
+                .addParams("sno",sno)
+                .build()
+                .execute(new StringCallback()
+                {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        Toast.makeText(context,"网络错误",Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onResponse(String response, int id) {
+                        Log.d(TAG, "onResponse: "+response);
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            int status = jsonObject.getJSONObject("data").getInt("status");
+                            if(status == 1)
+                                Toast.makeText(context,"退选成功",Toast.LENGTH_LONG).show();
+                            else
+                                Toast.makeText(context,"退选失败",Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(context,"服务器错误",Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 }
