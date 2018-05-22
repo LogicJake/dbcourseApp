@@ -1,15 +1,19 @@
 package com.scy.courseselection;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -32,7 +36,7 @@ import okhttp3.Call;
 
 import static com.scy.courseselection.MainActivity.api_url;
 
-public class AllScActivity extends AppCompatActivity implements SpringView.OnFreshListener,ScAdapter.Callback {
+public class AllScActivity extends AppCompatActivity implements SpringView.OnFreshListener,ScAdapter.Callback,AdapterView.OnItemClickListener {
     private Context context = this;
     private ScAdapter.Callback callback = this;
     private SpringView sv;
@@ -53,8 +57,9 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                     String sno = intent.getStringExtra("sno");
                     if (sno!=null)
                         scAdapter = new ScAdapter(context, mListData,true,callback);
-                    else
-                        scAdapter = new ScAdapter(context, mListData,false,callback);
+                    else {
+                        scAdapter = new ScAdapter(context, mListData, false, callback);
+                    }
                     mlistview.setAdapter(scAdapter);
                     setListViewHeightBasedOnChildren(mlistview);
                     scAdapter.notifyDataSetChanged();
@@ -76,6 +81,11 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
         mlistview = (ListView)findViewById(R.id.booklist) ;
         mlistview.setDividerHeight(5);
         getData();
+
+        Intent intent = getIntent();
+        String cno = intent.getStringExtra("cno");
+        if (cno!=null)                  //教务处信息可以设置分数
+            mlistview.setOnItemClickListener(this);
     }
 
     @Override
@@ -128,7 +138,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
         }
     }
 
-    public void getDataByCno(String cno){
+    public void getDataByCno(final String cno){
         setTitle("学生名单");
         OkHttpUtils
                 .get()
@@ -158,6 +168,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                                 map.put("sname", temp.getString("sname"));
                                 map.put("cname", temp.getString("cname"));
                                 map.put("credit", temp.getString("credit"));
+                                map.put("cno", cno);
                                 map.put("grade", temp.getString("grade"));
                                 mListData.add(map);
                             }
@@ -217,7 +228,6 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                 });
     }
 
-
     public void click(View v) {
         String sno = (String)mListData.get((Integer) v.getTag()).get("sno");
         String cno = (String)mListData.get((Integer) v.getTag()).get("cno");
@@ -249,6 +259,63 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                                 Toast.makeText(context,"退选成功",Toast.LENGTH_LONG).show();
                             else
                                 Toast.makeText(context,"退选失败",Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(context,"服务器错误",Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+        final EditText editText = new EditText(context);
+        if (!((String)mListData.get(i).get("grade")).equals("未录入"))
+            editText.setText((String)mListData.get(i).get("grade"));
+        new AlertDialog.Builder(this)
+                .setTitle("修改分数")
+                .setView(editText)
+                .setCancelable(false)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.e(TAG, "onClick: "+editText.getText().toString() );
+                        String cno =(String) mListData.get(i).get("cno");
+                        String sno =(String)  mListData.get(i).get("sno");
+                        String grade = editText.getText().toString();
+                        updateGrade(cno,sno,grade);
+                    }
+                })
+                .create().show();
+    }
+
+    public void updateGrade(String cno,String sno, String grade){
+        OkHttpUtils
+                .get()
+                .url(api_url)
+                .addParams("_action", "updateGrade")
+                .addParams("cno", cno)
+                .addParams("sno",sno)
+                .addParams("grade",grade)
+                .build()
+                .execute(new StringCallback()
+                {
+                    @Override
+                    public void onError(Call call, Exception e, int id) {
+                        Toast.makeText(context,"网络错误",Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onResponse(String response, int id) {
+                        Log.d(TAG, "onResponse: "+response);
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            int status = jsonObject.getJSONObject("data").getInt("status");
+                            if(status == 1)
+                                Toast.makeText(context,"修改成功",Toast.LENGTH_LONG).show();
+                            else
+                                Toast.makeText(context,"修改失败",Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Toast.makeText(context,"服务器错误",Toast.LENGTH_LONG).show();
