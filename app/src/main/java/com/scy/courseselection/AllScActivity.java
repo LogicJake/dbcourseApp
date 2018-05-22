@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -31,8 +32,9 @@ import okhttp3.Call;
 
 import static com.scy.courseselection.MainActivity.api_url;
 
-public class AllScActivity extends AppCompatActivity implements SpringView.OnFreshListener{
+public class AllScActivity extends AppCompatActivity implements SpringView.OnFreshListener,ScAdapter.Callback {
     private Context context = this;
+    private ScAdapter.Callback callback = this;
     private SpringView sv;
     private int page = 1;
     private boolean is_done = true;
@@ -47,8 +49,12 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
             switch (msg.what) {
                 case 0:
                     System.out.println(mListData);
-
-                    scAdapter = new ScAdapter(context, mListData);
+                    Intent intent = getIntent();
+                    String sno = intent.getStringExtra("sno");
+                    if (sno!=null)
+                        scAdapter = new ScAdapter(context, mListData,true,callback);
+                    else
+                        scAdapter = new ScAdapter(context, mListData,false,callback);
                     mlistview.setAdapter(scAdapter);
                     setListViewHeightBasedOnChildren(mlistview);
                     scAdapter.notifyDataSetChanged();
@@ -62,16 +68,13 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_sc);
 
-        setTitle("学生名单");
-
         sv = (SpringView) findViewById(R.id.sv);//sv
         sv.setHeader(new DefaultHeader(this));
         sv.setFooter(new DefaultFooter(this));
         sv.setListener(this);
 
         mlistview = (ListView)findViewById(R.id.booklist) ;
-        mlistview.setDividerHeight(5 );
-
+        mlistview.setDividerHeight(5);
         getData();
     }
 
@@ -126,6 +129,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
     }
 
     public void getDataByCno(String cno){
+        setTitle("学生名单");
         OkHttpUtils
                 .get()
                 .url(api_url)
@@ -169,6 +173,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
     }
 
     public void getDataBySno(String sno){
+        setTitle("课程名单");
         OkHttpUtils
                 .get()
                 .url(api_url)
@@ -209,5 +214,13 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                         }
                     }
                 });
+    }
+
+
+    public void click(View v) {
+        Toast.makeText(
+                context,
+                "listview的内部的按钮被点击了！，位置是-->" + (Integer) v.getTag(),
+                Toast.LENGTH_SHORT).show();
     }
 }

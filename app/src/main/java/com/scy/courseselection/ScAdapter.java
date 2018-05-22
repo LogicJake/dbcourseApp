@@ -4,18 +4,32 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class ScAdapter extends BaseAdapter {
+public class ScAdapter extends BaseAdapter implements View.OnClickListener {
     private Context context;
     List<HashMap<String, Object>> list;
+    private boolean exist;
+    private Callback mCallback;
 
-    public ScAdapter(Context context, List<HashMap<String, Object>> list) {
+    /**
+     * 自定义接口，用于回调按钮点击事件到Activity
+     * @author Ivan Xu
+     * 2014-11-26
+     */
+    public interface Callback {
+        public void click(View v);
+    }
+
+    public ScAdapter(Context context, List<HashMap<String, Object>> list,boolean exist,Callback callback) {
         this.context = context;
         this.list = list;
+        this.exist = exist;
+        mCallback = callback;
     }
 
     @Override
@@ -44,6 +58,8 @@ public class ScAdapter extends BaseAdapter {
             holder.cname = (TextView) convertView.findViewById(R.id.item_cname);
             holder.credit = (TextView) convertView.findViewById(R.id.item_credit);
             holder.grade = (TextView) convertView.findViewById(R.id.item_grade);
+            holder.button = (Button) convertView.findViewById(R.id.item_button);
+
             convertView.setTag(holder);
         }else {
             holder = (ViewHolder) convertView.getTag();
@@ -53,6 +69,11 @@ public class ScAdapter extends BaseAdapter {
         holder.cname.setText((String)list.get(position).get("cname"));
         holder.credit.setText((String)list.get(position).get("credit"));
         holder.grade.setText((String)list.get(position).get("grade"));
+        if (exist){
+            holder.button.setOnClickListener(this);
+            holder.button.setTag(position);
+            holder.button.setVisibility(View.VISIBLE);
+        }
         return convertView;
     }
 
@@ -62,6 +83,12 @@ public class ScAdapter extends BaseAdapter {
         private TextView cname;
         private TextView credit;
         private TextView grade;
+        private Button button;
+    }
 
+    //响应按钮点击事件,调用子定义接口，并传入View
+    @Override
+    public void onClick(View v) {
+        mCallback.click(v);
     }
 }

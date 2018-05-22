@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity
                                 role.setText(name);
                                 navigationView.getMenu().setGroupVisible(R.id.student,true);
                                 navigationView.getMenu().setGroupVisible(R.id.teacher,false);
-                                Toast.makeText(context, "登陆成功："+jsonObject.getJSONObject("data").getString("msg"), Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, "登陆成功", Toast.LENGTH_LONG).show();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
