@@ -55,11 +55,7 @@ public class AllCourseSatusActivity extends AppCompatActivity implements SpringV
                     sv.onFinishFreshAndLoad();
                     break;
                 case 1:
-                    int status = (int)msg.obj;
-                    if (status == 1)
-                        Toast.makeText(context,"选课成功",Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(context,"选课失败",Toast.LENGTH_SHORT).show();
+                    courseStatusAdapter.notifyDataSetChanged();
                     break;
             }
         }
@@ -149,7 +145,7 @@ public class AllCourseSatusActivity extends AppCompatActivity implements SpringV
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+    public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
         String status = (String) mListData.get(i).get("status");
         final String cno = (String) mListData.get(i).get("no");
         if (status.equals("已选课")){
@@ -165,14 +161,14 @@ public class AllCourseSatusActivity extends AppCompatActivity implements SpringV
                     .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            chooseCourse(sharedPreferences.getString("no",null),cno);
+                            chooseCourse(i,sharedPreferences.getString("no",null),cno);
                         }
                     })
                     .create().show();
         }
     }
 
-    public void chooseCourse(String sno,String cno){
+    public void chooseCourse(final int i,String sno,String cno){
         OkHttpUtils
                 .get()
                 .url(api_url)
@@ -193,10 +189,17 @@ public class AllCourseSatusActivity extends AppCompatActivity implements SpringV
                         try {
                             JSONObject res = new JSONObject(response).getJSONObject("data");
                             int status = res.getInt("status");
-                            Message msg = new Message();
-                            msg.what = 1;
-                            msg.obj = status;
-                            handler.sendMessage(msg);
+                            if (status == 1) {
+                                HashMap map = mListData.get(i);
+                                map.put("status", "已选课");
+                                mListData.set(i,map);
+                                Message msg = new Message();
+                                msg.what = 1;
+                                handler.sendMessage(msg);
+                                Toast.makeText(context, "选课成功", Toast.LENGTH_SHORT).show();
+                            }
+                            else
+                                Toast.makeText(context,"选课失败",Toast.LENGTH_SHORT).show();
                         } catch (Exception e) {
                             e.printStackTrace();
                             Toast.makeText(context,"服务器错误",Toast.LENGTH_LONG).show();

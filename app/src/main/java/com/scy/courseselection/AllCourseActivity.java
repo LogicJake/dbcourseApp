@@ -54,12 +54,14 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
             switch (msg.what) {
                 case 0:
                     System.out.println(mListData);
-
                     courseAdapter = new CourseAdapter(context, mListData);
                     mlistview.setAdapter(courseAdapter);
                     setListViewHeightBasedOnChildren(mlistview);
                     courseAdapter.notifyDataSetChanged();
                     sv.onFinishFreshAndLoad();
+                    break;
+                case 1:
+                    courseAdapter.notifyDataSetChanged();
                     break;
             }
         }
@@ -217,11 +219,11 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
                 .getMenuInfo();
-        int i = (int) info.id;
+        final int i = (int) info.id;
         String cno = (String) mListData.get(i).get("no");
         switch (item.getItemId()) {
             case 1:
-                deleteCourse(cno);
+                deleteCourse(i,cno);
                 break;
             case 0:
             {
@@ -246,7 +248,7 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                                 String content_cno = no .getText().toString();
                                 String content_cname = cname .getText().toString();
                                 String content_credit = credit .getText().toString();
-                                updateCourse(content_cno,content_cname,content_credit);
+                                updateCourse(i,content_cno,content_cname,content_credit);
                                 dialog.dismiss();
                             }
                         })
@@ -262,7 +264,7 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
         return super.onContextItemSelected(item);
     }
 
-    public void updateCourse(String cno,String cname,String credit){
+    public void updateCourse(final int i,final String cno,final String cname,final String credit){
         OkHttpUtils
                 .get()
                 .url(api_url)
@@ -284,8 +286,17 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                         try {
                             JSONObject res = new JSONObject(response).getJSONObject("data");
                             int status = res.getInt("status");
-                            if(status == 1)
+                            if(status == 1){
+                                HashMap<String ,Object> map = new HashMap<>();
+                                map.put("name",cname);
+                                map.put("no", cno);
+                                map.put("credit",credit);
+                                mListData.set(i,map);
+                                Message message = new Message();
+                                message.what = 1;
+                                handler.sendMessage(message);
                                 Toast.makeText(context,"更新成功",Toast.LENGTH_LONG).show();
+                            }
                             else
                                 Toast.makeText(context,"更新失败",Toast.LENGTH_LONG).show();
 
@@ -297,7 +308,7 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                 });
     }
 
-    public void deleteCourse(final String cno){
+    public void deleteCourse(final int i, final String cno){
         new AlertDialog.Builder(this)
                 .setTitle("确定")
                 .setMessage("是否确认删除该课程")
@@ -325,8 +336,13 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                                         try {
                                             JSONObject res = new JSONObject(response).getJSONObject("data");
                                             int status = res.getInt("status");
-                                            if(status == 1)
-                                                Toast.makeText(context,"删除成功",Toast.LENGTH_LONG).show();
+                                            if(status == 1) {
+                                                mListData.remove(i);
+                                                Message message = new Message();
+                                                message.what = 1;
+                                                handler.sendMessage(message);
+                                                Toast.makeText(context, "删除成功", Toast.LENGTH_LONG).show();
+                                            }
                                             else
                                                 Toast.makeText(context,"删除失败",Toast.LENGTH_LONG).show();
 

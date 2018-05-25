@@ -64,6 +64,9 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                     scAdapter.notifyDataSetChanged();
                     sv.onFinishFreshAndLoad();
                     break;
+                case 1:
+                    scAdapter.notifyDataSetChanged();
+                    break;
             }
         }
     };
@@ -230,10 +233,10 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
     public void click(View v) {
         String sno = (String)mListData.get((Integer) v.getTag()).get("sno");
         String cno = (String)mListData.get((Integer) v.getTag()).get("cno");
-        deleteSc(sno,cno);
+        deleteSc((Integer) v.getTag(),sno,cno);
     }
 
-    public void deleteSc(String sno,String cno){
+    public void deleteSc(final int i,String sno,String cno){
         OkHttpUtils
                 .get()
                 .url(api_url)
@@ -254,8 +257,13 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             int status = jsonObject.getJSONObject("data").getInt("status");
-                            if(status == 1)
-                                Toast.makeText(context,"退选成功",Toast.LENGTH_LONG).show();
+                            if(status == 1) {
+                                mListData.remove(i);
+                                Message message = new Message();
+                                message.what = 1;
+                                handler.sendMessage(message);
+                                Toast.makeText(context, "退选成功", Toast.LENGTH_LONG).show();
+                            }
                             else
                                 Toast.makeText(context,"退选失败",Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {
@@ -283,13 +291,13 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                         String cno =(String) mListData.get(i).get("cno");
                         String sno =(String)  mListData.get(i).get("sno");
                         String grade = editText.getText().toString();
-                        updateGrade(cno,sno,grade);
+                        updateGrade(i,cno,sno,grade);
                     }
                 })
                 .create().show();
     }
 
-    public void updateGrade(String cno,String sno, String grade){
+    public void updateGrade(final int i , String cno, String sno, final String grade){
         OkHttpUtils
                 .get()
                 .url(api_url)
@@ -311,8 +319,15 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             int status = jsonObject.getJSONObject("data").getInt("status");
-                            if(status == 1)
-                                Toast.makeText(context,"修改成功",Toast.LENGTH_LONG).show();
+                            if(status == 1) {
+                                HashMap map = mListData.get(i);
+                                map.put("grade",grade);
+                                mListData.set(i,map);
+                                Message message = new Message();
+                                message.what = 1;
+                                handler.sendMessage(message);
+                                Toast.makeText(context, "修改成功", Toast.LENGTH_LONG).show();
+                            }
                             else
                                 Toast.makeText(context,"修改失败",Toast.LENGTH_LONG).show();
                         } catch (JSONException e) {

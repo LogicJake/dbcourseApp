@@ -61,6 +61,9 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                     stuAdapter.notifyDataSetChanged();
                     sv.onFinishFreshAndLoad();
                     break;
+                case 1:
+                    stuAdapter.notifyDataSetChanged();
+                    break;
             }
         }
     };
@@ -112,11 +115,11 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
                 .getMenuInfo();
-        int i = (int) info.id;
+        final int i = (int) info.id;
         String sno = (String) mListData.get(i).get("no");
         switch (item.getItemId()) {
             case 1:
-                deleteStu(sno);
+                deleteStu(i,sno);
                 break;
             case 0:
                 String old_no = (String)mListData.get(i).get("no");
@@ -139,7 +142,7 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                 dept.setText(old_dept);
 
                 AlertDialog dialog = new AlertDialog.Builder(this)
-                        .setTitle("更新课程信息")
+                        .setTitle("更新学生信息")
                         .setView(dialog_view)
                         .setCancelable(false)
                         .setNegativeButton("取消",null)
@@ -151,7 +154,8 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                                 String content_sex = sex .getText().toString();
                                 String content_age = age .getText().toString();
                                 String content_dept = dept .getText().toString();
-                                updateStu(content_no,content_name,content_sex,content_age,content_dept);
+                                updateStu(i,content_no,content_name,content_sex,content_age,content_dept);
+
                                 dialog.dismiss();
                             }
                         })
@@ -161,7 +165,7 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
         return super.onContextItemSelected(item);
     }
 
-    public void updateStu(String no,String name,String sex,String age,String dept){
+    public void updateStu(final int i,final String no,final String name,final String sex,final String age,final String dept){
         OkHttpUtils
                 .get()
                 .url(api_url)
@@ -185,8 +189,19 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                         try {
                             JSONObject res = new JSONObject(response).getJSONObject("data");
                             int status = res.getInt("status");
-                            if(status == 1)
-                                Toast.makeText(context,"更新成功",Toast.LENGTH_LONG).show();
+                            if(status == 1) {
+                                HashMap map = new HashMap<String,Object>();
+                                map.put("name",name);
+                                map.put("no", no);
+                                map.put("age", age);
+                                map.put("sex",sex);
+                                map.put("dept",dept);
+                                mListData.set(i,map);
+                                Message message = new Message();
+                                message.what = 1;
+                                handler.sendMessage(message);
+                                Toast.makeText(context, "更新成功", Toast.LENGTH_LONG).show();
+                            }
                             else
                                 Toast.makeText(context,"更新失败",Toast.LENGTH_LONG).show();
 
@@ -196,6 +211,7 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                         }
                     }
                 });
+
     }
 
 
@@ -291,7 +307,7 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
         }
     }
 
-    public void addStu(String no,String name,String sex,String age,String dept){
+    public void addStu(final String no, final String name, final String sex, final String age, final String dept){
         OkHttpUtils
                 .get()
                 .url(api_url)
@@ -315,8 +331,19 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                         try {
                             JSONObject res = new JSONObject(response).getJSONObject("data");
                             int status = res.getInt("status");
-                            if(status == 1)
-                                Toast.makeText(context,"添加成功",Toast.LENGTH_LONG).show();
+                            if(status == 1) {
+                                HashMap map = new HashMap<String,Object>();
+                                map.put("name",name);
+                                map.put("no", no);
+                                map.put("age", age);
+                                map.put("sex",sex);
+                                map.put("dept",dept);
+                                mListData.add(map);
+                                Message message = new Message();
+                                message.what = 1;
+                                handler.sendMessage(message);
+                                Toast.makeText(context, "添加成功", Toast.LENGTH_LONG).show();
+                            }
                             else
                                 Toast.makeText(context,"添加失败",Toast.LENGTH_LONG).show();
 
@@ -328,7 +355,7 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                 });
     }
 
-    public void deleteStu(final String sno){
+    public void deleteStu(final int i,final String sno){
         new AlertDialog.Builder(this)
                 .setTitle("确定")
                 .setMessage("是否确认删除该学生")
@@ -356,8 +383,13 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                                         try {
                                             JSONObject res = new JSONObject(response).getJSONObject("data");
                                             int status = res.getInt("status");
-                                            if(status == 1)
-                                                Toast.makeText(context,"删除成功",Toast.LENGTH_LONG).show();
+                                            if(status == 1) {
+                                                mListData.remove(i);
+                                                Message message = new Message();
+                                                message.what = 1;
+                                                handler.sendMessage(message);
+                                                Toast.makeText(context, "删除成功", Toast.LENGTH_LONG).show();
+                                            }
                                             else
                                                 Toast.makeText(context,"删除失败",Toast.LENGTH_LONG).show();
 
