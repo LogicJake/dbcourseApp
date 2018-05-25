@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // Another interface callback
+
             }
         });
 
@@ -95,7 +95,12 @@ public class MainActivity extends AppCompatActivity
                 .setTitle("填写学号")
                 .setView(view)
                 .setCancelable(false)
-                .setNegativeButton("取消",null)
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        spinner.setSelection(0);
+                    }
+                })
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -198,7 +203,6 @@ public class MainActivity extends AppCompatActivity
                                 spinner.setSelection(0);
                             }
                             else{
-
                                 String name = jsonObject.getJSONObject("data").getJSONObject("data").getString("name");
                                 String sex = jsonObject.getJSONObject("data").getJSONObject("data").getString("sex");
                                 String age = jsonObject.getJSONObject("data").getJSONObject("data").getString("age");
@@ -217,8 +221,6 @@ public class MainActivity extends AppCompatActivity
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
-
                     }
                 });
     }
