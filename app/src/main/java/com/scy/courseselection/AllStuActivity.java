@@ -332,16 +332,6 @@ public class AllStuActivity extends AppCompatActivity implements SpringView.OnFr
                             JSONObject res = new JSONObject(response).getJSONObject("data");
                             int status = res.getInt("status");
                             if(status == 1) {
-                                HashMap map = new HashMap<String,Object>();
-                                map.put("name",name);
-                                map.put("no", no);
-                                map.put("age", age);
-                                map.put("sex",sex);
-                                map.put("dept",dept);
-                                mListData.add(map);
-                                Message message = new Message();
-                                message.what = 1;
-                                handler.sendMessage(message);
                                 Toast.makeText(context, "添加成功", Toast.LENGTH_LONG).show();
                             }
                             else
