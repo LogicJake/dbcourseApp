@@ -24,10 +24,10 @@
         <activity
             android:name=".AboutActivity"
             android:theme="@style/AppTheme.MaterialAboutActivity" />
-        <activity android:name=".AllStuActivity" />
         <activity android:name=".AllCourseActivity" />
         <activity android:name=".AllScActivity" />
         <activity android:name=".AllCourseSatusActivity" />
+        <activity android:name=".SelectStuActivity"></activity>
     </application>
 
 </manifest>

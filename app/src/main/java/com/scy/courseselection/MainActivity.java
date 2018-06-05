@@ -90,7 +90,8 @@ public class MainActivity extends AppCompatActivity
 
     public void fillIn(){
         View view = getLayoutInflater().inflate(R.layout.dialog_view, null);
-        final EditText editText = (EditText) view.findViewById(R.id.dialog_edit);
+        final EditText uid = (EditText) view.findViewById(R.id.uid);
+        final EditText password = (EditText) view.findViewById(R.id.password);
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("填写学号")
                 .setView(view)
@@ -104,8 +105,9 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String content = editText .getText().toString();
-                        checkStudent(content);
+                        String content_uid = uid .getText().toString();
+                        String content_password = password .getText().toString();
+                        checkStudent(content_uid,content_password);
                         dialog.dismiss();
                     }
                 })
@@ -162,7 +164,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(context,AboutActivity.class);
             startActivity(intent);
         } else if (id == R.id.t1){
-            Intent intent = new Intent(context,AllStuActivity.class);
+            Intent intent = new Intent(context,SelectStuActivity.class);
             startActivity(intent);
         } else if (id == R.id.t2){
             Intent intent = new Intent(context,AllCourseActivity.class);
@@ -174,12 +176,13 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void checkStudent(final String uid){
+    public void checkStudent(final String uid,final String password){
         OkHttpUtils
                 .get()
                 .url(api_url)
-                .addParams("_action", "getStu")
+                .addParams("_action", "login")
                 .addParams("sno", uid)
+                .addParams("password",password)
                 .build()
                 .execute(new StringCallback()
                 {
@@ -201,6 +204,9 @@ public class MainActivity extends AppCompatActivity
                             else if (status == -1) {
                                 Toast.makeText(context, "数据库错误："+jsonObject.getJSONObject("data").getString("msg"), Toast.LENGTH_LONG).show();
                                 spinner.setSelection(0);
+                            }
+                            else if (status == -2){
+                                Toast.makeText(context, "密码错误：", Toast.LENGTH_LONG).show();
                             }
                             else{
                                 String name = jsonObject.getJSONObject("data").getJSONObject("data").getString("name");
