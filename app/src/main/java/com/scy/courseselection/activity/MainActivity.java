@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.s1) {
-            Intent intent = new  Intent(MainActivity.this,AllCourseSatusActivity.class);
+            Intent intent = new  Intent(MainActivity.this,SelectCourseSatusActivity.class);
             startActivity(intent);
         } else if (id == R.id.s2) {
             String sno = sharedPreferences.getString("no",null);

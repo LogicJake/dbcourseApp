@@ -26,7 +26,7 @@
             android:theme="@style/AppTheme.MaterialAboutActivity" />
         <activity android:name=".activity.SelectCourseActivity" />
         <activity android:name=".activity.AllScActivity" />
-        <activity android:name=".activity.AllCourseSatusActivity" />
+        <activity android:name=".activity.SelectCourseSatusActivity" />
         <activity android:name=".activity.SelectStuActivity"></activity>
     </application>
 
