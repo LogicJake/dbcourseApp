@@ -7,53 +7,59 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="5dp"
         android:orientation="vertical">
         <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp">
-
-            <EditText
-                android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/filter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="请输入关键词" />
-        <Button
-            android:id="@+id/searech"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="查找"/>
-    </LinearLayout>
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".AllStuActivity">
-        <com.liaoinstan.springview.widget.SpringView
-            android:id="@+id/sv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/title"
-            xmlns:android="http://schemas.android.com/apk/res/android">
-            <ScrollView
-            android:id="@+id/scrollView"
-            android:layout_width="match_parent"
-            android:descendantFocusability="blocksDescendants"
-            android:layout_height="wrap_content">
-            <LinearLayout
+                android:text="筛选条件" />
+            <Button
+                android:id="@+id/clear"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-                <ListView
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="清除筛选条件" />
+            <Button
+                android:id="@+id/searech"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="搜索" />
+        </LinearLayout>
+        <TextView
+            android:id="@+id/tv_filter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="无筛选条件"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <com.liaoinstan.springview.widget.SpringView
+                android:id="@+id/sv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ScrollView
+                    android:id="@+id/scrollView"
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:id="@+id/booklist">
-                </ListView>
-            </LinearLayout>
-
-        </ScrollView>
-        </com.liaoinstan.springview.widget.SpringView>
-    </LinearLayout>
+                    android:descendantFocusability="blocksDescendants"
+                    android:layout_height="wrap_content">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+                        <ListView
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:id="@+id/booklist">
+                        </ListView>
+                    </LinearLayout>
+                </ScrollView>
+            </com.liaoinstan.springview.widget.SpringView>
+        </LinearLayout>
     </LinearLayout>
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

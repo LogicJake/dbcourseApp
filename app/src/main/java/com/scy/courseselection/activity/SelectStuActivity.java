@@ -14,8 +14,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.Checkable;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.liaoinstan.springview.container.DefaultFooter;
@@ -43,15 +47,15 @@ public class SelectStuActivity extends AppCompatActivity implements SpringView.O
     private static final String TAG = "SelectStuActivity";
     private ListView mlistview;
     private Context context = this;
-    private EditText content;
-    private Button search;
-    private String cont;
-    private boolean is_done = true;
+    private Button search,filter,clear;
+    private boolean is_done = false;
     List<HashMap<String, Object>> mListData  = new ArrayList<HashMap<String, Object>>();;
     private StuAdapter stuAdapter;
     private int page = 1;
     private SpringView sv;
+    private String filter_content = "";
     private FloatingActionButton floatingActionButton;
+    private TextView tv_filter;
 
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -65,9 +69,6 @@ public class SelectStuActivity extends AppCompatActivity implements SpringView.O
                     stuAdapter.notifyDataSetChanged();
                     sv.onFinishFreshAndLoad();
                     break;
-                case 1:
-                    stuAdapter.notifyDataSetChanged();
-                    break;
             }
         }
     };
@@ -76,10 +77,14 @@ public class SelectStuActivity extends AppCompatActivity implements SpringView.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_stu);
         setTitle("学生名单");
-        content = (EditText)findViewById(R.id.content);
         search = (Button)findViewById(R.id.searech);
+        filter = (Button)findViewById(R.id.filter);
+        clear = (Button)findViewById(R.id.clear);
+        filter.setOnClickListener(this);
+        clear.setOnClickListener(this);
         search.setOnClickListener(this);
 
+        tv_filter = (TextView)findViewById(R.id.tv_filter);
         sv = (SpringView) findViewById(R.id.sv);//sv
         sv.setHeader(new DefaultHeader(this));
         sv.setFooter(new DefaultFooter(this));
@@ -135,10 +140,116 @@ public class SelectStuActivity extends AppCompatActivity implements SpringView.O
             case R.id.searech: {
                 mListData.clear();      //清空数据
                 page = 1;
-                cont = content.getText().toString().length() == 0 ? "allstu" : content.getText().toString();
                 getData();
+                break;
+            }
+
+            case R.id.clear:{
+                mListData.clear();      //清空数据
+                tv_filter.setText("无筛选条件");
+                page = 1;
+                filter_content = "";
+                is_done = true;
+                Message msg = new Message();
+                msg.what = 0;
+                handler.sendMessage(msg);
+                break;
+            }
+
+            case R.id.filter:{
+                setFilter();
+                break;
             }
         }
+    }
+
+    public void setFilter(){
+        View dialog_view = getLayoutInflater().inflate(R.layout.filter_stu, null);
+        final EditText no = (EditText) dialog_view.findViewById(R.id.dialog_sno);
+        final EditText name = (EditText) dialog_view.findViewById(R.id.dialog_sname);
+        final EditText age = (EditText) dialog_view.findViewById(R.id.dialog_age);
+        final EditText dept = (EditText) dialog_view.findViewById(R.id.dialog_dept);
+        final CheckBox cb_sname = (CheckBox) dialog_view.findViewById(R.id.cb_sname);
+        final CheckBox cb_sdept = (CheckBox) dialog_view.findViewById(R.id.cb_sdept);
+        final CheckBox cb_male = (CheckBox) dialog_view.findViewById(R.id.male);
+        final CheckBox cb_female = (CheckBox) dialog_view.findViewById(R.id.female);
+        final Spinner re = (Spinner) dialog_view.findViewById(R.id.re);
+
+        new AlertDialog.Builder(this)
+                .setTitle("筛选条件")
+                .setView(dialog_view)
+                .setCancelable(false)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Boolean first = true;
+                        String fil = "";
+                        if (no.getText().toString().length() != 0)
+                        {
+                            fil = fil + "Sno = "+no.getText().toString();
+                            first = false;
+                        }
+                        if (name.getText().toString().length() != 0)
+                        {
+                            if (first)
+                                first = false;
+                            else
+                                fil = fil + " AND ";
+                            if (cb_sname.isChecked())
+                                fil = fil + "Sname like '%"+name.getText().toString()+"%'";
+                            else
+                                fil = fil + "Sname = '"+name.getText().toString()+"'";
+                        }
+                        if (cb_male.isChecked() && !cb_female.isChecked()){
+                            if (first)
+                                first = false;
+                            else
+                                fil = fil + " AND ";
+                            fil = fil + "Ssex = '男'";
+                        }
+                        if (cb_female.isChecked() && !cb_male.isChecked()){
+                            if (first)
+                                first = false;
+                            else
+                                fil = fil + " AND ";
+                            fil = fil + "Ssex = '女'";
+                        }
+                        if (re.getSelectedItemPosition()!=0 && age.getText().toString().length() != 0){
+                            if (first)
+                                first = false;
+                            else
+                                fil = fil + " AND ";
+                            switch (re.getSelectedItemPosition()){
+                                case 1:
+                                    fil = fil + "Sage > "+age.getText().toString();
+                                    break;
+                                case 2:
+                                    fil = fil + "Sage < "+age.getText().toString();
+                                    break;
+                                case 3:
+                                    fil = fil + "Sage = "+age.getText().toString();
+                                    break;
+                            }
+                        }
+                        if (dept.getText().toString().length() != 0)
+                        {
+                            if (first)
+                                first = false;
+                            else
+                                fil = fil + " AND ";
+                            if (cb_sdept.isChecked())
+                                fil = fil + "Sdept like '%"+dept.getText().toString()+"%'";
+                            else
+                                fil = fil + "Sdept = "+dept.getText().toString();
+                            first = false;
+                        }
+                        filter_content = "WHERE "+fil;
+                        tv_filter.setText(fil);
+                        System.out.println(fil);
+                    }
+                })
+                .show();
     }
 
     public void addStu(final String no, final String name, final String sex, final String age, final String dept){
@@ -178,7 +289,6 @@ public class SelectStuActivity extends AppCompatActivity implements SpringView.O
                     }
                 });
     }
-
 
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
@@ -238,7 +348,7 @@ public class SelectStuActivity extends AppCompatActivity implements SpringView.O
                 .get()
                 .url(api_url)
                 .addParams("_action", "selectStu")
-                .addParams("key", cont)
+                .addParams("key", filter_content)
                 .addParams("page", Integer.toString(page))
                 .build()
                 .execute(new StringCallback()
@@ -255,6 +365,8 @@ public class SelectStuActivity extends AppCompatActivity implements SpringView.O
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray result = jsonObject.getJSONObject("data").getJSONArray("data");
                             is_done = jsonObject.getJSONObject("data").getBoolean("finished");
+                            int num = jsonObject.getJSONObject("data").getInt("num");
+                            Toast.makeText(context,"总共查询到："+num+"条记录",Toast.LENGTH_LONG).show();
                             for (int i = 0; i < result.length(); i++) {
                                 JSONObject temp = (JSONObject) result.get(i);
                                 HashMap map = new HashMap<String,Object>();
@@ -279,6 +391,7 @@ public class SelectStuActivity extends AppCompatActivity implements SpringView.O
     public void onRefresh() {
         mListData.clear();
         page = 1;       //重新从第一页开始
+        is_done = false;
         getData();
     }
 

@@ -4,4 +4,11 @@
         <item>教务员</item>
         <item>学生</item>
     </string-array>
+
+    <string-array name="relationship">
+        <item>不限制</item>
+        <item>大于</item>
+        <item>小于</item>
+        <item>等于</item>
+    </string-array>
 </resources>
