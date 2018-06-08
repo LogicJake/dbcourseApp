@@ -1,4 +1,4 @@
-package com.scy.courseselection;
+package com.scy.courseselection.activity;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,6 +10,7 @@ import com.danielstone.materialaboutlibrary.MaterialAboutActivity;
 import com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard;
 import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
+import com.scy.courseselection.R;
 
 public class AboutActivity extends MaterialAboutActivity {
 

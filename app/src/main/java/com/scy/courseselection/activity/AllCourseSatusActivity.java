@@ -1,4 +1,4 @@
-package com.scy.courseselection;
+package com.scy.courseselection.activity;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +17,8 @@ import android.widget.Toast;
 import com.liaoinstan.springview.container.DefaultFooter;
 import com.liaoinstan.springview.container.DefaultHeader;
 import com.liaoinstan.springview.widget.SpringView;
+import com.scy.courseselection.adapter.CourseStatusAdapter;
+import com.scy.courseselection.R;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
@@ -30,8 +32,8 @@ import java.util.List;
 
 import okhttp3.Call;
 
-import static com.scy.courseselection.AllScActivity.setListViewHeightBasedOnChildren;
-import static com.scy.courseselection.MainActivity.api_url;
+import static com.scy.courseselection.activity.AllScActivity.setListViewHeightBasedOnChildren;
+import static com.scy.courseselection.activity.MainActivity.api_url;
 
 public class AllCourseSatusActivity extends AppCompatActivity implements SpringView.OnFreshListener,AdapterView.OnItemClickListener{
     private Context context = this;

@@ -1,4 +1,4 @@
-package com.scy.courseselection;
+package com.scy.courseselection.adapter;
 
 import android.content.Context;
 import android.view.View;
@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.scy.courseselection.R;
 
 import java.util.HashMap;
 import java.util.List;

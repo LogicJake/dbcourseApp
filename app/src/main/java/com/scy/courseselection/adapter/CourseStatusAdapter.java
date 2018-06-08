@@ -1,4 +1,4 @@
-package com.scy.courseselection;
+package com.scy.courseselection.adapter;
 
 import android.content.Context;
 import android.view.View;
@@ -6,14 +6,16 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.scy.courseselection.R;
+
 import java.util.HashMap;
 import java.util.List;
 
-public class CourseAdapter extends BaseAdapter {
+public class CourseStatusAdapter extends BaseAdapter {
     private Context context;
     List<HashMap<String, Object>> list;
 
-    public CourseAdapter(Context context, List<HashMap<String, Object>> list) {
+    public CourseStatusAdapter(Context context, List<HashMap<String, Object>> list) {
         this.context = context;
         this.list = list;
     }
@@ -37,11 +39,12 @@ public class CourseAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         if (convertView == null) {
-            convertView = View.inflate(context, R.layout.item_list_course, null);
+            convertView = View.inflate(context, R.layout.item_list_course_status, null);
             holder = new ViewHolder();
             holder.name = (TextView) convertView.findViewById(R.id.item_name);
             holder.no = (TextView) convertView.findViewById(R.id.item_no);
             holder.credit = (TextView) convertView.findViewById(R.id.item_credit);
+            holder.status = (TextView) convertView.findViewById(R.id.item_status);
 
             convertView.setTag(holder);
         }else {
@@ -50,6 +53,7 @@ public class CourseAdapter extends BaseAdapter {
         holder.name.setText((String)list.get(position).get("name"));
         holder.no.setText((String)list.get(position).get("no"));
         holder.credit.setText((String)list.get(position).get("credit"));
+        holder.status.setText((String)list.get(position).get("status"));
         return convertView;
     }
 
@@ -57,5 +61,6 @@ public class CourseAdapter extends BaseAdapter {
         private TextView no;
         private TextView name;
         private TextView credit;
+        private TextView status;
     }
 }
