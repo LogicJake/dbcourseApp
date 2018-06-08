@@ -41,7 +41,8 @@
             <com.liaoinstan.springview.widget.SpringView
                 android:id="@+id/sv"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/title">
                 <ScrollView
                     android:id="@+id/scrollView"
                     android:layout_width="match_parent"
@@ -56,10 +57,13 @@
                             android:id="@+id/booklist">
                         </ListView>
                     </LinearLayout>
+
                 </ScrollView>
             </com.liaoinstan.springview.widget.SpringView>
+
         </LinearLayout>
     </LinearLayout>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

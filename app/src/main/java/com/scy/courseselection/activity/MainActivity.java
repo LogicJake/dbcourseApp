@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(context,SelectStuActivity.class);
             startActivity(intent);
         } else if (id == R.id.t2){
-            Intent intent = new Intent(context,AllCourseActivity.class);
+            Intent intent = new Intent(context,SelectCourseActivity.class);
             startActivity(intent);
         }
 

@@ -14,8 +14,12 @@ import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.liaoinstan.springview.container.DefaultFooter;
@@ -39,7 +43,7 @@ import okhttp3.Call;
 import static com.scy.courseselection.activity.AllScActivity.setListViewHeightBasedOnChildren;
 import static com.scy.courseselection.activity.MainActivity.api_url;
 
-public class AllCourseActivity extends AppCompatActivity implements SpringView.OnFreshListener,View.OnClickListener {
+public class SelectCourseActivity extends AppCompatActivity implements SpringView.OnFreshListener,View.OnClickListener {
     private Context context = this;
     private SpringView sv;
     private int page = 1;
@@ -47,8 +51,11 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
     private ListView mlistview;
     List<HashMap<String, Object>> mListData  = new ArrayList<HashMap<String, Object>>();;
     private CourseAdapter courseAdapter;
-    private static final String TAG = "AllCourseActivity";
+    private static final String TAG = "SelectCourseActivity";
     private FloatingActionButton floatingActionButton;
+    private TextView tv_filter;
+    private String filter_content = "";
+    private Button search,filter,clear;
 
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -71,9 +78,16 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_all_course);
+        setContentView(R.layout.activity_select_course);
         setTitle("课程列表");
+        search = (Button)findViewById(R.id.searech);
+        filter = (Button)findViewById(R.id.filter);
+        clear = (Button)findViewById(R.id.clear);
+        filter.setOnClickListener(this);
+        clear.setOnClickListener(this);
+        search.setOnClickListener(this);
 
+        tv_filter = (TextView)findViewById(R.id.tv_filter);
         sv = (SpringView) findViewById(R.id.sv);//sv
         sv.setHeader(new DefaultHeader(this));
         sv.setFooter(new DefaultFooter(this));
@@ -91,14 +105,13 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
         });
         floatingActionButton = (FloatingActionButton)findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(this);
-
-        getData();
     }
 
     @Override
     public void onRefresh() {
         mListData.clear();
         page = 1;       //重新从第一页开始
+        is_done = false;
         getData();
     }
 
@@ -109,7 +122,7 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
             getData();
         }
         else {
-            Toast.makeText(AllCourseActivity.this, "没有更多课程信息", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SelectCourseActivity.this, "没有更多课程信息", Toast.LENGTH_SHORT).show();
             sv.onFinishFreshAndLoad();
         }
     }
@@ -118,8 +131,9 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
         OkHttpUtils
                 .get()
                 .url(api_url)
-                .addParams("_action", "selectCourseAll")
+                .addParams("_action", "selectCourse")
                 .addParams("page", Integer.toString(page))
+                .addParams("key", filter_content)
                 .build()
                 .execute(new StringCallback()
                 {
@@ -135,6 +149,8 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray result = jsonObject.getJSONObject("data").getJSONArray("data");
                             is_done = jsonObject.getJSONObject("data").getBoolean("finished");
+                            int num = jsonObject.getJSONObject("data").getInt("num");
+                            Toast.makeText(context,"总共查询到："+num+"条记录",Toast.LENGTH_LONG).show();
                             for (int i = 0; i < result.length(); i++) {
                                 JSONObject temp = (JSONObject) result.get(i);
                                 HashMap map = new HashMap<String,Object>();
@@ -180,7 +196,89 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                         .show();
                 break;
             }
+            case R.id.searech: {
+                mListData.clear();      //清空数据
+                page = 1;
+                getData();
+                break;
+            }
+
+            case R.id.clear:{
+                mListData.clear();      //清空数据
+                tv_filter.setText("无筛选条件");
+                page = 1;
+                filter_content = "";
+                is_done = true;
+                Message msg = new Message();
+                msg.what = 0;
+                handler.sendMessage(msg);
+                break;
+            }
+
+            case R.id.filter:{
+                setFilter();
+                break;
+            }
         }
+    }
+
+    public void setFilter(){
+        View dialog_view = getLayoutInflater().inflate(R.layout.filter_course, null);
+        final EditText no = (EditText) dialog_view.findViewById(R.id.dialog_cno);
+        final EditText name = (EditText) dialog_view.findViewById(R.id.dialog_cname);
+        final EditText credit = (EditText) dialog_view.findViewById(R.id.dialog_credit);
+        final CheckBox cb_cname = (CheckBox) dialog_view.findViewById(R.id.cb_cname);
+        final Spinner re = (Spinner) dialog_view.findViewById(R.id.re);
+        System.out.println("11111");
+        new AlertDialog.Builder(this)
+                .setTitle("筛选条件")
+                .setView(dialog_view)
+                .setCancelable(false)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Boolean first = true;
+                        String fil = "";
+                        if (no.getText().toString().length() != 0)
+                        {
+                            fil = fil + "Cno = "+no.getText().toString();
+                            first = false;
+                        }
+                        if (name.getText().toString().length() != 0)
+                        {
+                            if (first)
+                                first = false;
+                            else
+                                fil = fil + " AND ";
+                            if (cb_cname.isChecked())
+                                fil = fil + "Cname like '%"+name.getText().toString()+"%'";
+                            else
+                                fil = fil + "Cname = '"+name.getText().toString()+"'";
+                        }
+                        if (re.getSelectedItemPosition()!=0 && credit.getText().toString().length() != 0){
+                            if (first)
+                                first = false;
+                            else
+                                fil = fil + " AND ";
+                            switch (re.getSelectedItemPosition()){
+                                case 1:
+                                    fil = fil + "Ccredit > "+credit.getText().toString();
+                                    break;
+                                case 2:
+                                    fil = fil + "Ccredit < "+credit.getText().toString();
+                                    break;
+                                case 3:
+                                    fil = fil + "Ccredit = "+credit.getText().toString();
+                                    break;
+                            }
+                        }
+                        filter_content = "WHERE "+fil;
+                        tv_filter.setText(fil);
+                        System.out.println(fil);
+                    }
+                })
+                .show();
     }
 
     public void addCourse(String cno,String cname,String credit){
@@ -258,7 +356,7 @@ public class AllCourseActivity extends AppCompatActivity implements SpringView.O
                 break;
             }
             case 2:
-                Intent intent = new  Intent(AllCourseActivity.this,AllScActivity.class);
+                Intent intent = new  Intent(SelectCourseActivity.this,AllScActivity.class);
                 intent.putExtra("cno",cno);
                 startActivity(intent);
                 break;

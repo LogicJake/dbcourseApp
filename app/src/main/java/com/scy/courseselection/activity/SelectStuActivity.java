@@ -104,7 +104,6 @@ public class SelectStuActivity extends AppCompatActivity implements SpringView.O
 
         floatingActionButton = (FloatingActionButton)findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(this);
-
     }
 
     @Override
