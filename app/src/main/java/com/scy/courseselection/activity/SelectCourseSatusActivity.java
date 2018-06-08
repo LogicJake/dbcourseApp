@@ -37,7 +37,7 @@ import java.util.List;
 
 import okhttp3.Call;
 
-import static com.scy.courseselection.activity.AllScActivity.setListViewHeightBasedOnChildren;
+import static com.scy.courseselection.activity.SelectScActivity.setListViewHeightBasedOnChildren;
 import static com.scy.courseselection.activity.MainActivity.api_url;
 
 public class SelectCourseSatusActivity extends AppCompatActivity implements SpringView.OnFreshListener,AdapterView.OnItemClickListener,View.OnClickListener{

@@ -56,6 +56,7 @@ public class ScAdapter extends BaseAdapter implements View.OnClickListener {
             convertView = View.inflate(context, R.layout.item_list_sc, null);
             holder = new ViewHolder();
             holder.sno = (TextView) convertView.findViewById(R.id.item_sno);
+            holder.cno = (TextView) convertView.findViewById(R.id.item_cno);
             holder.sname = (TextView) convertView.findViewById(R.id.item_sname);
             holder.cname = (TextView) convertView.findViewById(R.id.item_cname);
             holder.credit = (TextView) convertView.findViewById(R.id.item_credit);
@@ -67,6 +68,7 @@ public class ScAdapter extends BaseAdapter implements View.OnClickListener {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.sno.setText((String)list.get(position).get("sno"));
+        holder.cno.setText((String)list.get(position).get("cno"));
         holder.sname.setText((String)list.get(position).get("sname"));
         holder.cname.setText((String)list.get(position).get("cname"));
         holder.credit.setText((String)list.get(position).get("credit"));
@@ -81,6 +83,7 @@ public class ScAdapter extends BaseAdapter implements View.OnClickListener {
 
     public class ViewHolder {
         private TextView sno;
+        private TextView cno;
         private TextView sname;
         private TextView cname;
         private TextView credit;

@@ -40,7 +40,7 @@ import java.util.List;
 
 import okhttp3.Call;
 
-import static com.scy.courseselection.activity.AllScActivity.setListViewHeightBasedOnChildren;
+import static com.scy.courseselection.activity.SelectScActivity.setListViewHeightBasedOnChildren;
 import static com.scy.courseselection.activity.MainActivity.api_url;
 
 public class SelectCourseActivity extends AppCompatActivity implements SpringView.OnFreshListener,View.OnClickListener {
@@ -105,6 +105,7 @@ public class SelectCourseActivity extends AppCompatActivity implements SpringVie
         });
         floatingActionButton = (FloatingActionButton)findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(this);
+        getData();
     }
 
     @Override
@@ -230,7 +231,6 @@ public class SelectCourseActivity extends AppCompatActivity implements SpringVie
         final CheckBox cb_cname = (CheckBox) dialog_view.findViewById(R.id.cb_cname);
         final CheckBox cb_cno = (CheckBox) dialog_view.findViewById(R.id.cb_cno);
         final Spinner re = (Spinner) dialog_view.findViewById(R.id.re);
-        System.out.println("11111");
         new AlertDialog.Builder(this)
                 .setTitle("筛选条件")
                 .setView(dialog_view)
@@ -360,7 +360,7 @@ public class SelectCourseActivity extends AppCompatActivity implements SpringVie
                 break;
             }
             case 2:
-                Intent intent = new  Intent(SelectCourseActivity.this,AllScActivity.class);
+                Intent intent = new  Intent(SelectCourseActivity.this,SelectScActivity.class);
                 intent.putExtra("cno",cno);
                 startActivity(intent);
                 break;

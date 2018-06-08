@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.s2) {
             String sno = sharedPreferences.getString("no",null);
-            Intent intent = new  Intent(MainActivity.this,AllScActivity.class);
+            Intent intent = new  Intent(MainActivity.this,SelectScActivity.class);
             intent.putExtra("sno",sno);
             startActivity(intent);
         }else if (id == R.id.s3){

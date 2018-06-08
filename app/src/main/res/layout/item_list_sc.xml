@@ -21,6 +21,12 @@
             android:layout_height="wrap_content"
             android:text="TextView" />
 
+        <TextView
+            android:id="@+id/item_grade"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
+
 
     </LinearLayout>
 
@@ -29,6 +35,12 @@
         android:orientation="vertical"
         android:layout_weight="1"
         android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/item_cno"
+            android:maxLines="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
         <TextView
             android:id="@+id/item_cname"
             android:maxLines="1"
@@ -42,11 +54,6 @@
             android:layout_height="wrap_content"
             android:text="TextView" />
 
-        <TextView
-            android:id="@+id/item_grade"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
     </LinearLayout>
 
     <Button

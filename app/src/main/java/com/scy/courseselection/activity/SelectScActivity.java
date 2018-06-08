@@ -12,9 +12,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.liaoinstan.springview.container.DefaultFooter;
@@ -37,7 +41,7 @@ import okhttp3.Call;
 
 import static com.scy.courseselection.activity.MainActivity.api_url;
 
-public class AllScActivity extends AppCompatActivity implements SpringView.OnFreshListener,ScAdapter.Callback,AdapterView.OnItemClickListener {
+public class SelectScActivity extends AppCompatActivity implements SpringView.OnFreshListener,ScAdapter.Callback,AdapterView.OnItemClickListener,View.OnClickListener {
     private Context context = this;
     private ScAdapter.Callback callback = this;
     private SpringView sv;
@@ -47,6 +51,9 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
     List<HashMap<String, Object>> mListData  = new ArrayList<HashMap<String, Object>>();;
     private ScAdapter scAdapter;
     private static final String TAG = "AllStuActivity";
+    private TextView tv_filter;
+    private String filter_content = "";
+    private Button search,filter,clear;
 
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -76,11 +83,17 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_sc);
-
+        search = (Button)findViewById(R.id.searech);
+        filter = (Button)findViewById(R.id.filter);
+        clear = (Button)findViewById(R.id.clear);
+        filter.setOnClickListener(this);
+        clear.setOnClickListener(this);
+        search.setOnClickListener(this);
         sv = (SpringView) findViewById(R.id.sv);//sv
         sv.setHeader(new DefaultHeader(this));
         sv.setFooter(new DefaultFooter(this));
         sv.setListener(this);
+        tv_filter = (TextView)findViewById(R.id.tv_filter);
 
         mlistview = (ListView)findViewById(R.id.booklist) ;
         mlistview.setDividerHeight(5);
@@ -96,6 +109,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
     public void onRefresh() {
         mListData.clear();
         page = 1;       //重新从第一页开始
+        is_done = false;
         getData();
     }
 
@@ -106,7 +120,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
             getData();
         }
         else {
-            Toast.makeText(AllScActivity.this, "没有更多选课信息", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SelectScActivity.this, "没有更多选课信息", Toast.LENGTH_SHORT).show();
             sv.onFinishFreshAndLoad();
         }
     }
@@ -149,6 +163,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                 .url(api_url)
                 .addParams("_action", "selectScByCno")
                 .addParams("page", Integer.toString(page))
+                .addParams("key", filter_content)
                 .addParams("cno",cno)
                 .build()
                 .execute(new StringCallback()
@@ -165,6 +180,8 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray result = jsonObject.getJSONObject("data").getJSONArray("data");
                             is_done = jsonObject.getJSONObject("data").getBoolean("finished");
+                            int num = jsonObject.getJSONObject("data").getInt("num");
+                            Toast.makeText(context,"总共查询到："+num+"条记录",Toast.LENGTH_LONG).show();
                             for (int i = 0; i < result.length(); i++) {
                                 JSONObject temp = (JSONObject) result.get(i);
                                 HashMap map = new HashMap<String,Object>();
@@ -194,6 +211,7 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                 .url(api_url)
                 .addParams("_action", "selectScBySno")
                 .addParams("page", Integer.toString(page))
+                .addParams("key", filter_content)
                 .addParams("sno",sno)
                 .build()
                 .execute(new StringCallback()
@@ -210,6 +228,8 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                             JSONObject jsonObject = new JSONObject(response);
                             JSONArray result = jsonObject.getJSONObject("data").getJSONArray("data");
                             is_done = jsonObject.getJSONObject("data").getBoolean("finished");
+                            int num = jsonObject.getJSONObject("data").getInt("num");
+                            Toast.makeText(context,"总共查询到："+num+"条记录",Toast.LENGTH_LONG).show();
                             for (int i = 0; i < result.length(); i++) {
                                 JSONObject temp = (JSONObject) result.get(i);
                                 HashMap map = new HashMap<String,Object>();
@@ -338,5 +358,153 @@ public class AllScActivity extends AppCompatActivity implements SpringView.OnFre
                         }
                     }
                 });
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.searech: {
+                mListData.clear();      //清空数据
+                page = 1;
+                getData();
+                break;
+            }
+
+            case R.id.clear:{
+                mListData.clear();      //清空数据
+                tv_filter.setText("无筛选条件");
+                page = 1;
+                filter_content = "";
+                is_done = true;
+                Message msg = new Message();
+                msg.what = 0;
+                handler.sendMessage(msg);
+                break;
+            }
+
+            case R.id.filter:{
+                setFilter();
+                break;
+            }
+        }
+    }
+
+    public void setFilter(){
+        View dialog_view = getLayoutInflater().inflate(R.layout.filter_sc, null);
+        final EditText cno = (EditText) dialog_view.findViewById(R.id.dialog_cno);
+        final EditText cname = (EditText) dialog_view.findViewById(R.id.dialog_cname);
+        final EditText sno = (EditText) dialog_view.findViewById(R.id.dialog_sno);
+        final EditText sname = (EditText) dialog_view.findViewById(R.id.dialog_sname);
+        final EditText credit = (EditText) dialog_view.findViewById(R.id.dialog_credit);
+        final EditText grade = (EditText) dialog_view.findViewById(R.id.dialog_grade);
+        final CheckBox cb_cname = (CheckBox) dialog_view.findViewById(R.id.cb_cname);
+        final CheckBox cb_cno = (CheckBox) dialog_view.findViewById(R.id.cb_cno);
+        final CheckBox cb_sname = (CheckBox) dialog_view.findViewById(R.id.cb_sname);
+        final Spinner re = (Spinner) dialog_view.findViewById(R.id.re);
+        final Spinner re2 = (Spinner) dialog_view.findViewById(R.id.re2);
+        Intent intent = getIntent();
+        final String ccno = intent.getStringExtra("cno");
+        final String ssno = intent.getStringExtra("sno");
+        if(ccno!=null){
+            cno.setVisibility(View.GONE);
+            cname.setVisibility(View.GONE);
+            cb_cno.setVisibility(View.GONE);
+            cb_cname.setVisibility(View.GONE);
+            re.setVisibility(View.GONE);
+            credit.setVisibility(View.GONE);
+        }
+        else if (ssno!=null){
+            sno.setVisibility(View.GONE);
+            sname.setVisibility(View.GONE);
+            cb_sname.setVisibility(View.GONE);
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("筛选条件")
+                .setView(dialog_view)
+                .setCancelable(false)
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String fil = "";
+                        if(ccno!=null){
+                            if (sno.getText().toString().length() != 0) {
+                                fil = fil + " AND ";
+                                fil = fil + "sc.Sno = " + sno.getText().toString();
+                            }
+                            if (sname.getText().toString().length() != 0)
+                            {
+                                fil = fil + " AND ";
+                                if (cb_sname.isChecked())
+                                    fil = fil + "Sname like '%"+sname.getText().toString()+"%'";
+                                else
+                                    fil = fil + "Sname = '"+sname.getText().toString()+"'";
+                            }
+                            if (re2.getSelectedItemPosition()!=0 && grade.getText().toString().length() != 0){
+                                fil = fil + " AND ";
+                                switch (re2.getSelectedItemPosition()){
+                                    case 1:
+                                        fil = fil + "Grade > "+grade.getText().toString();
+                                        break;
+                                    case 2:
+                                        fil = fil + "Grade < "+grade.getText().toString();
+                                        break;
+                                    case 3:
+                                        fil = fil + "Grade = "+grade.getText().toString();
+                                        break;
+                                }
+                            }
+                        }
+                        else if (ssno!=null){
+                            if (cno.getText().toString().length() != 0) {
+                                fil = fil + " AND ";
+                                if (cb_cno.isChecked())
+                                    fil = fil + "c.Cno like '%"+cno.getText().toString()+"%'";
+                                else
+                                    fil = fil + "c.Cno = '"+cno.getText().toString()+"'";
+                            }
+                            if (cname.getText().toString().length() != 0)
+                            {
+                                fil = fil + " AND ";
+                                if (cb_cname.isChecked())
+                                    fil = fil + "Cname like '%"+cname.getText().toString()+"%'";
+                                else
+                                    fil = fil + "Cname = '"+cname.getText().toString()+"'";
+                            }
+                            if (re.getSelectedItemPosition()!=0 && credit.getText().toString().length() != 0){
+                                fil = fil + " AND ";
+                                switch (re.getSelectedItemPosition()){
+                                    case 1:
+                                        fil = fil + "Ccredit > "+credit.getText().toString();
+                                        break;
+                                    case 2:
+                                        fil = fil + "Ccredit < "+credit.getText().toString();
+                                        break;
+                                    case 3:
+                                        fil = fil + "Ccredit = "+credit.getText().toString();
+                                        break;
+                                }
+                            }
+                            if (re2.getSelectedItemPosition()!=0 && grade.getText().toString().length() != 0){
+                                fil = fil + " AND ";
+                                switch (re2.getSelectedItemPosition()){
+                                    case 1:
+                                        fil = fil + "Grade > "+grade.getText().toString();
+                                        break;
+                                    case 2:
+                                        fil = fil + "Grade < "+grade.getText().toString();
+                                        break;
+                                    case 3:
+                                        fil = fil + "Grade = "+grade.getText().toString();
+                                        break;
+                                }
+                            }
+                        }
+                        filter_content = fil;
+                        tv_filter.setText(fil);
+                        System.out.println(fil);
+                    }
+                })
+                .show();
     }
 }
