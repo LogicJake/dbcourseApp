@@ -228,6 +228,7 @@ public class SelectCourseActivity extends AppCompatActivity implements SpringVie
         final EditText name = (EditText) dialog_view.findViewById(R.id.dialog_cname);
         final EditText credit = (EditText) dialog_view.findViewById(R.id.dialog_credit);
         final CheckBox cb_cname = (CheckBox) dialog_view.findViewById(R.id.cb_cname);
+        final CheckBox cb_cno = (CheckBox) dialog_view.findViewById(R.id.cb_cno);
         final Spinner re = (Spinner) dialog_view.findViewById(R.id.re);
         System.out.println("11111");
         new AlertDialog.Builder(this)
@@ -242,7 +243,10 @@ public class SelectCourseActivity extends AppCompatActivity implements SpringVie
                         String fil = "";
                         if (no.getText().toString().length() != 0)
                         {
-                            fil = fil + "Cno = "+no.getText().toString();
+                            if (cb_cno.isChecked())
+                                fil = fil + "Cno like '%"+name.getText().toString()+"%'";
+                            else
+                                fil = fil + "Cno = '"+name.getText().toString()+"'";
                             first = false;
                         }
                         if (name.getText().toString().length() != 0)

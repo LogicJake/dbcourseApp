@@ -17,6 +17,13 @@
             android:layout_weight="1"
             android:hint="筛选课程号"
             android:inputType="number" />
+
+        <CheckBox
+            android:id="@+id/cb_cno"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:checked="true"
+            android:text="模糊查询" />
     </LinearLayout>
 
 
